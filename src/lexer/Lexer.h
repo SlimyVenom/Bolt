@@ -3,14 +3,11 @@
 
 class Lexer {
 private:
-    std::string source;
+    const std::string& source;
     std::size_t position = 0;
 
 public:
-
-    Lexer(std::string &s) {
-        source = s;
-    }
+    Lexer(const std::string& s) : source(s) {}
 
     void skipWhiteSpaces() {
         if (position == source.size())
@@ -35,28 +32,31 @@ public:
 
         // Colon
         if (source[position] == ':') {
-            Token token;
-            token.kind = TokenKind::Colon;
-            token.value = ":";
             position++;
-            return token;
+            return {TokenKind::Colon, ":"};
         }
 
         // Semi-Colon
         if (source[position] == ';') {
-            Token token;
-            token.kind = TokenKind::Semicolon;
-            token.value = ";";
             position++;
-            return token;
+            return {TokenKind::Semicolon, ";"};
+        }
+
+        // Equal
+        if (source[position] == '=') {
+            position++;
+            return {TokenKind::Equal, "="};
+        }
+
+        // Sign (+ / -)
+        if (source[position] == '+' || source[position] == '-') {
+            char sign = source[position];
+            position++;
+            return {TokenKind::Sign, std::string(1, sign)};
         }
 
         if (position == source.size()) {
-            Token token;
-            token.kind = TokenKind::EndOfFile;
-            token.value = "";
-
-            return token;
+            return {TokenKind::EndOfFile, ""};
         }
 
         std::string word = "";
@@ -70,62 +70,42 @@ public:
 
             word += curr;
             position++;
-            if (curr == '.') dots++;
-            if (position == source.size()) break;
+
+            if (curr == '.')
+                dots++;
+
+            if (position == source.size())
+                break;
+
             curr = source[position];
         }
 
-        Token token;
-        token.value = word;
-
         // Invalid character
         if (word == "") {
-            token.kind = TokenKind::Invalid;
-            token.value = source[position];
+            char invalidCharacter = source[position];
             position++;
-
-            return token;
+            return {TokenKind::Invalid, std::string(1, invalidCharacter)};
         }
 
         // Keyword / Type / Identifier
         if ((word[0] >= 'a' && word[0] <= 'z') ||
             (word[0] >= 'A' && word[0] <= 'Z')) {
 
-            if (word == "let") {
-                token.kind = TokenKind::Let;
-            }
-            else if (word == "int") {
-                token.kind = TokenKind::Int;
-            }
-            else if (word == "float") {
-                token.kind = TokenKind::Float;
-            }
-            else if (dots == 0) {
-                token.kind = TokenKind::Identifier;
-            }
-            else {
-                token.kind = TokenKind::Invalid;
-            }
-
-            return token;
+            if (word == "let") return {TokenKind::Let, word};
+            else if (word == "int") return {TokenKind::Int, word};
+            else if (word == "float") return {TokenKind::Float, word};
+            else if (dots == 0) return {TokenKind::Identifier, word};
+            else return {TokenKind::Invalid, word};
         }
 
         // Numeric literal
         if (word[0] >= '0' && word[0] <= '9') {
 
-            if (dots == 0) {
-                token.kind = TokenKind::IntegerLiteral;
-            }
-            else if (dots == 1) {
-                token.kind = TokenKind::FloatLiteral;
-            }
-            else {
-                token.kind = TokenKind::Invalid;
-            }
-
-            return token;
+            if (dots == 0) return {TokenKind::IntegerLiteral, word};
+            else if (dots == 1) return {TokenKind::FloatLiteral, word};
+            else return {TokenKind::Invalid, word};
         }
 
-        return token;
+        return {TokenKind::Invalid, word};
     }
 };

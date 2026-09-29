@@ -35,16 +35,15 @@ std::string tokenKindToString(TokenKind kind) {
 
 int main() {
     std::string source =
-        "let x: int = 42;\n"
-        "let y: float = 3.14;";
+        "let x: int = -42;\n"
+        "let y: float = +3.14;";
 
     Lexer lexer(source);
 
     while (true) {
         Token token = lexer.nextToken();
 
-        std::cout << tokenKindToString(token.kind)
-                  << " -> \"" << token.value << "\"   ";
+        std::cout << tokenKindToString(token.kind) << " -> \"" << token.value << "\"   ";
         std::cout << "\n";
 
         if (token.kind == TokenKind::EndOfFile)
