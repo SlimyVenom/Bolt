@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Token.h"
 #include <string>
 
@@ -30,6 +32,10 @@ public:
     Token nextToken() {
         skipWhiteSpaces();
 
+        if (position == source.size()) {
+            return {TokenKind::EndOfFile, ""};
+        }
+
         // Colon
         if (source[position] == ':') {
             position++;
@@ -53,10 +59,6 @@ public:
             char sign = source[position];
             position++;
             return {TokenKind::Sign, std::string(1, sign)};
-        }
-
-        if (position == source.size()) {
-            return {TokenKind::EndOfFile, ""};
         }
 
         std::string word = "";

@@ -1,52 +1,61 @@
 #include "lexer/Lexer.h"
+#include "parser/Parser.h"
+#include "ast/AST.h"
+
 #include <iostream>
 #include <string>
 
-std::string tokenKindToString(TokenKind kind) {
-    switch (kind) {
-        case TokenKind::Let:
-            return "Let";
-        case TokenKind::Identifier:
-            return "Identifier";
-        case TokenKind::Colon:
-            return "Colon";
-        case TokenKind::Int:
-            return "Int";
-        case TokenKind::Float:
-            return "Float";
-        case TokenKind::Equal:
-            return "Equal";
-        case TokenKind::Sign:
-            return "Sign";
-        case TokenKind::IntegerLiteral:
-            return "IntegerLiteral";
-        case TokenKind::FloatLiteral:
-            return "FloatLiteral";
-        case TokenKind::Semicolon:
-            return "Semicolon";
-        case TokenKind::EndOfFile:
-            return "EndOfFile";
-        case TokenKind::Invalid:
-            return "Invalid";
-    }
-
-    return "Unknown";
-}
-
 int main() {
     std::string source =
-        "let x: int = -42;\n"
-        "let y: float = +3.14;";
+        "let age: int = 21;\n"
+        "let score: float = 99.8;";
+
+    std::cout << "=== Bolt Compiler ===\n\n";
+
+    std::cout << "Source:\n";
+    std::cout << source << "\n";
+
+    std::cout << "--------------------\n";
+    std::cout << "Lexing + Parsing...\n";
 
     Lexer lexer(source);
+    Parser parser(lexer);
 
-    while (true) {
-        Token token = lexer.nextToken();
+    std::unique_ptr<Program> program = parser.parseProgram();
 
-        std::cout << tokenKindToString(token.kind) << " -> \"" << token.value << "\"   ";
-        std::cout << "\n";
+    std::cout << "--------------------\n";
+    std::cout << "AST:\n";
 
-        if (token.kind == TokenKind::EndOfFile)
-            break;
+    for (const auto& statement : program->statements) {
+        auto* letStmt = dynamic_cast<LetStmt*>(statement.get());
+
+        std::cout << "LetStmt\n";
+        std::cout << "  name: " << letStmt->name << '\n';
+
+        if (letStmt->declaredType == BoltType::Int) {
+            std::cout << "  type: int\n";
+        }
+
+        if (letStmt->declaredType == BoltType::Float) {
+            std::cout << "  type: float\n";
+        }
+
+        auto* integerExpr =
+            dynamic_cast<IntegerLiteralExpr*>(letStmt->initializer.get());
+
+        if (integerExpr != nullptr) {
+            std::cout << "  value: " << integerExpr->value << '\n';
+        }
+
+        auto* floatExpr =
+            dynamic_cast<FloatLiteralExpr*>(letStmt->initializer.get());
+
+        if (floatExpr != nullptr) {
+            std::cout << "  value: " << floatExpr->value << '\n';
+        }
+
+        std::cout << '\n';
     }
+
+    std::cout << "Compilation frontend finished!\n";
 }
