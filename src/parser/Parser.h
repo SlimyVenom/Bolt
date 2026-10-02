@@ -74,38 +74,56 @@ public:
         // x
         std::string name = currentToken.value;
         if (!expect(TokenKind::Identifier)) return nullptr;
+
         if (!expect(TokenKind::Colon)) return nullptr;
 
-        // int
+        // int / float
         BoltType type;
+
         if (currentToken.kind != TokenKind::Int &&
             currentToken.kind != TokenKind::Float) {
             std::cout << "Parser error: expected token: Int or Float, got: "
                     << tokenKindToString(currentToken.kind) << '\n';
             return nullptr;
         }
+
         if (currentToken.kind == TokenKind::Int) {
             type = BoltType::Int;
             expect(TokenKind::Int);
         }
+
         if (currentToken.kind == TokenKind::Float) {
             type = BoltType::Float;
             expect(TokenKind::Float);
         }
+
         if (!expect(TokenKind::Equal)) return nullptr;
 
-        // 10;
+        // initializer
         std::unique_ptr<Expr> expression;
-        if (type == BoltType::Int) {
-            expression = std::make_unique<IntegerLiteralExpr>(std::stoi(currentToken.value));
-            if (!expect(TokenKind::IntegerLiteral)) return nullptr;
+
+        if (currentToken.kind == TokenKind::IntegerLiteral) {
+            expression = std::make_unique<IntegerLiteralExpr>(
+                std::stoi(currentToken.value)
+            );
+            expect(TokenKind::IntegerLiteral);
         }
-        if (type == BoltType::Float) {
-            expression = std::make_unique<FloatLiteralExpr>(std::stof(currentToken.value));
-            if (!expect(TokenKind::FloatLiteral)) return nullptr;
+
+        if (currentToken.kind == TokenKind::FloatLiteral) {
+            expression = std::make_unique<FloatLiteralExpr>(
+                std::stof(currentToken.value)
+            );
+            expect(TokenKind::FloatLiteral);
+        }
+
+        if (expression == nullptr) {
+            std::cout << "Parser error: expected integer or float literal, got: "
+                    << tokenKindToString(currentToken.kind) << '\n';
+            return nullptr;
         }
 
         if (!expect(TokenKind::Semicolon)) return nullptr;
+
         return std::make_unique<LetStmt>(name, type, std::move(expression));
     }
 };

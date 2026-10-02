@@ -1,3 +1,4 @@
+#include "semantic/SemanticAnalyzer.h"
 #include "lexer/Lexer.h"
 #include "parser/Parser.h"
 #include "ast/AST.h"
@@ -7,7 +8,7 @@
 
 int main() {
     std::string source =
-        "let age int = 21;";
+        "let age: int = 21.1;";
 
     std::cout << "=== Bolt Compiler ===\n\n";
 
@@ -22,11 +23,18 @@ int main() {
     Parser parser(lexer);
 
     std::unique_ptr<Program> program = parser.parseProgram();
-
     if (program == nullptr) {
         std::cout << "Parsing failed.\n";
         return 1;
     }
+
+    SemanticAnalyzer analyzer;
+    if (!analyzer.analyze(*program)) {
+        std::cout << "Semantic analysis failed.\n";
+        return 1;
+    }
+
+    std::cout << "AST:\n";
 
     std::cout << "AST:\n";
 
