@@ -7,8 +7,7 @@
 
 int main() {
     std::string source =
-        "let age: int = 21;\n"
-        "let score: float = 99.8;";
+        "let age int = 21;";
 
     std::cout << "=== Bolt Compiler ===\n\n";
 
@@ -17,13 +16,18 @@ int main() {
 
     std::cout << "--------------------\n";
     std::cout << "Lexing + Parsing...\n";
+    std::cout << "--------------------\n";
 
     Lexer lexer(source);
     Parser parser(lexer);
 
     std::unique_ptr<Program> program = parser.parseProgram();
 
-    std::cout << "--------------------\n";
+    if (program == nullptr) {
+        std::cout << "Parsing failed.\n";
+        return 1;
+    }
+
     std::cout << "AST:\n";
 
     for (const auto& statement : program->statements) {
@@ -58,4 +62,6 @@ int main() {
     }
 
     std::cout << "Compilation frontend finished!\n";
+
+    return 0;
 }
