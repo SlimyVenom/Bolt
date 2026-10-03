@@ -1,3 +1,4 @@
+#include "codegen/CodeGenerator.h"
 #include "semantic/SemanticAnalyzer.h"
 #include "lexer/Lexer.h"
 #include "parser/Parser.h"
@@ -8,7 +9,7 @@
 
 int main() {
     std::string source =
-        "let age: int = 21.1;";
+        "let age: int = 21;";
 
     std::cout << "=== Bolt Compiler ===\n\n";
 
@@ -70,6 +71,14 @@ int main() {
     }
 
     std::cout << "Compilation frontend finished!\n";
+
+    CodeGenerator generator;
+    generator.generate(*program);
+    generator.writeIR("bolt.ll");
+
+    std::cout << "--------------------\n";
+    std::cout << "LLVM IR:\n";
+    generator.dump();
 
     return 0;
 }

@@ -74,41 +74,34 @@ public:
         // x
         std::string name = currentToken.value;
         if (!expect(TokenKind::Identifier)) return nullptr;
-
         if (!expect(TokenKind::Colon)) return nullptr;
 
         // int / float
         BoltType type;
-
         if (currentToken.kind != TokenKind::Int &&
             currentToken.kind != TokenKind::Float) {
             std::cout << "Parser error: expected token: Int or Float, got: "
                     << tokenKindToString(currentToken.kind) << '\n';
             return nullptr;
         }
-
         if (currentToken.kind == TokenKind::Int) {
             type = BoltType::Int;
             expect(TokenKind::Int);
         }
-
         if (currentToken.kind == TokenKind::Float) {
             type = BoltType::Float;
             expect(TokenKind::Float);
         }
-
         if (!expect(TokenKind::Equal)) return nullptr;
 
         // initializer
         std::unique_ptr<Expr> expression;
-
         if (currentToken.kind == TokenKind::IntegerLiteral) {
             expression = std::make_unique<IntegerLiteralExpr>(
                 std::stoi(currentToken.value)
             );
             expect(TokenKind::IntegerLiteral);
         }
-
         if (currentToken.kind == TokenKind::FloatLiteral) {
             expression = std::make_unique<FloatLiteralExpr>(
                 std::stof(currentToken.value)
