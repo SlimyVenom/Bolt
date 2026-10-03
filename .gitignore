@@ -1,4 +1,6 @@
 .vscode/
 
-# Compiled binary:
+# Compiled files:
 src/test
+bolt
+bolt.ll

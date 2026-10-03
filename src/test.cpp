@@ -9,10 +9,10 @@
 
 int main() {
     std::string source =
-        "let age: int = 21;";
+        "let age: int = 21;\n"
+        "let score: float = 99.8;";
 
     std::cout << "=== Bolt Compiler ===\n\n";
-
     std::cout << "Source:\n";
     std::cout << source << "\n";
 
@@ -24,48 +24,34 @@ int main() {
     Parser parser(lexer);
 
     std::unique_ptr<Program> program = parser.parseProgram();
+
     if (program == nullptr) {
         std::cout << "Parsing failed.\n";
         return 1;
     }
 
     SemanticAnalyzer analyzer;
+
     if (!analyzer.analyze(*program)) {
         std::cout << "Semantic analysis failed.\n";
         return 1;
     }
 
     std::cout << "AST:\n";
-
-    std::cout << "AST:\n";
-
     for (const auto& statement : program->statements) {
         auto* letStmt = dynamic_cast<LetStmt*>(statement.get());
 
         std::cout << "LetStmt\n";
         std::cout << "  name: " << letStmt->name << '\n';
 
-        if (letStmt->declaredType == BoltType::Int) {
-            std::cout << "  type: int\n";
-        }
+        if (letStmt->declaredType == BoltType::Int) std::cout << "  type: int\n";
+        if (letStmt->declaredType == BoltType::Float) std::cout << "  type: float\n";
 
-        if (letStmt->declaredType == BoltType::Float) {
-            std::cout << "  type: float\n";
-        }
+        auto* integerExpr = dynamic_cast<IntegerLiteralExpr*>(letStmt->initializer.get());
+        if (integerExpr != nullptr) std::cout << "  value: " << integerExpr->value << '\n';
 
-        auto* integerExpr =
-            dynamic_cast<IntegerLiteralExpr*>(letStmt->initializer.get());
-
-        if (integerExpr != nullptr) {
-            std::cout << "  value: " << integerExpr->value << '\n';
-        }
-
-        auto* floatExpr =
-            dynamic_cast<FloatLiteralExpr*>(letStmt->initializer.get());
-
-        if (floatExpr != nullptr) {
-            std::cout << "  value: " << floatExpr->value << '\n';
-        }
+        auto* floatExpr = dynamic_cast<FloatLiteralExpr*>(letStmt->initializer.get());
+        if (floatExpr != nullptr) std::cout << "  value: " << floatExpr->value << '\n';
 
         std::cout << '\n';
     }
